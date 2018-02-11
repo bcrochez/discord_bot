@@ -21,17 +21,22 @@ logger.addHandler(ch)
 # creating bot
 bot = commands.Bot(command_prefix='!')
 
-# utils function
 
+# utils function
 
 def get_user_name(author):
     name = author.name
-    nick = "(" + author.nick + ")" if author.nick else ""
-    return name + " " + nick
+    nick = " (" + author.nick + ")" if hasattr(author, 'nick') and author.nick else ""
+    return name + nick
+
+
+def get_channel_name(channel):
+    channel_name = channel.name if channel.name else 'Private channel'
+    server = ' (' + channel.server.name + ')' if hasattr(channel, 'server') and channel.server else ''
+    return channel_name + server
 
 
 # EVENTS
-
 
 @bot.event
 async def on_ready():
@@ -39,6 +44,7 @@ async def on_ready():
     logger.info(bot.user.name)
     logger.info(bot.user.id)
     logger.info('------')
+    # listing servers
     servers = bot.servers
     if len(servers) != 0:
         logger.info("Joined servers : ")
@@ -47,16 +53,23 @@ async def on_ready():
     else:
         logger.info("No server joined")
 
+    logger.info('Bot is ready')
+
 
 @bot.event
 async def on_message(message):
     name = get_user_name(message.author)
-    logger.info("%s - %s - %s : %s", message.timestamp, message.channel.name, name, message.content)
+    channel = get_channel_name(message.channel)
+    logger.info("%s - [MESSAGE] %s - %s : %s", message.timestamp, channel, name, message.content)
     await bot.process_commands(message)
 
 
-# BOT COMMANDS
+@bot.event
+async def on_typing(channel, user, when):
+    logger.info('%s - [TYPING] %s - %s', str(when), get_channel_name(channel), get_user_name(user))
 
+
+# BOT COMMANDS
 
 @bot.command()
 async def echo(*, message):
@@ -122,6 +135,7 @@ async def _bot():
 
 if __name__ == '__main__':
     try:
+        logger.info('Preparing to run bot...')
         bot.run(DISCORD_BOT_TOKEN)
     except Exception as e:
         import sys
