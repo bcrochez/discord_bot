@@ -5,7 +5,18 @@ import logging
 import discord
 from discord.ext import commands
 
-logger = logging.Logger('discord logger')
+TOKEN = os.environ.get('TOKEN')
+
+logger = logging.getLogger('discord bot')
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(formatter)
+
+logger.addHandler(ch)
+
 bot = commands.Bot(command_prefix='!')
 
 
@@ -21,12 +32,11 @@ async def on_ready():
     logger.info(bot.user.name)
     logger.info(bot.user.id)
     logger.info('------')
-    logger.info(bot.command_prefix)
     servers = bot.servers
     if len(servers) != 0:
         logger.info("Joined servers : ")
         for server in servers:
-            logger.info("\t- " + server.name + " owned by " + server.owner.name)
+            logger.info("\t- %s owned by %s", server.name, server.owner.name)
     else:
         logger.info("No server joined")
 
@@ -34,7 +44,7 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     name = get_user_name(message.author)
-    logger.info(message.timestamp, " - " + message.channel.name + " - " + name + " : " + message.content)
+    logger.info("%s - %s - %s : %s", message.timestamp, message.channel.name, name, message.content)
     await bot.process_commands(message)
 
 
@@ -100,7 +110,7 @@ async def _bot():
 
 if __name__ == '__main__':
     try:
-        bot.run(os.environ.get('TOKEN'))
+        bot.run(TOKEN)
     except Exception as e:
         import sys
 
