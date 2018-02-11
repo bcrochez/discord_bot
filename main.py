@@ -5,8 +5,9 @@ import logging
 import discord
 from discord.ext import commands
 
-TOKEN = os.environ.get('TOKEN')
+DISCORD_BOT_TOKEN = os.environ.get('TOKEN')
 
+# creating logger
 logger = logging.getLogger('discord bot')
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -17,13 +18,19 @@ ch.setFormatter(formatter)
 
 logger.addHandler(ch)
 
+# creating bot
 bot = commands.Bot(command_prefix='!')
+
+# utils function
 
 
 def get_user_name(author):
     name = author.name
     nick = "(" + author.nick + ")" if author.nick else ""
     return name + " " + nick
+
+
+# EVENTS
 
 
 @bot.event
@@ -46,6 +53,9 @@ async def on_message(message):
     name = get_user_name(message.author)
     logger.info("%s - %s - %s : %s", message.timestamp, message.channel.name, name, message.content)
     await bot.process_commands(message)
+
+
+# BOT COMMANDS
 
 
 @bot.command()
@@ -108,9 +118,11 @@ async def _bot():
     await bot.say('Yes, the bot is cool.')
 
 
+# Main function
+
 if __name__ == '__main__':
     try:
-        bot.run(TOKEN)
+        bot.run(DISCORD_BOT_TOKEN)
     except Exception as e:
         import sys
 
