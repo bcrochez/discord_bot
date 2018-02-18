@@ -2,29 +2,36 @@ import os
 import random
 import logging
 
+from module import *
+import utils.logger_utils
+
 import discord
 from discord.ext import commands
 
-TOKEN = os.environ.get('TOKEN')
+DISCORD_BOT_TOKEN = os.environ.get('TOKEN')
 
-logger = logging.getLogger('discord bot')
-logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# creating logger
+logger = utils.logger_utils.get_logger('discord bot', logging.INFO)
 
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-ch.setFormatter(formatter)
-
-logger.addHandler(ch)
-
+# creating bot
 bot = commands.Bot(command_prefix='!')
 
 
+# utils function
+
 def get_user_name(author):
     name = author.name
-    nick = "(" + author.nick + ")" if author.nick else ""
-    return name + " " + nick
+    nick = " (" + author.nick + ")" if hasattr(author, 'nick') and author.nick else ""
+    return name + nick
 
+
+def get_channel_name(channel):
+    channel_name = channel.name if channel.name else 'Private channel'
+    server = ' (' + channel.server.name + ')' if hasattr(channel, 'server') and channel.server else ''
+    return channel_name + server
+
+
+# EVENTS
 
 @bot.event
 async def on_ready():
@@ -32,6 +39,7 @@ async def on_ready():
     logger.info(bot.user.name)
     logger.info(bot.user.id)
     logger.info('------')
+    # listing servers
     servers = bot.servers
     if len(servers) != 0:
         logger.info("Joined servers : ")
@@ -40,13 +48,23 @@ async def on_ready():
     else:
         logger.info("No server joined")
 
+    logger.info('Bot is ready')
+
 
 @bot.event
 async def on_message(message):
     name = get_user_name(message.author)
-    logger.info("%s - %s - %s : %s", message.timestamp, message.channel.name, name, message.content)
+    channel = get_channel_name(message.channel)
+    logger.info("%s - [MESSAGE] %s - %s : %s", message.timestamp, channel, name, message.content)
     await bot.process_commands(message)
 
+
+@bot.event
+async def on_typing(channel, user, when):
+    logger.debug('%s - [TYPING] %s - %s', str(when), get_channel_name(channel), get_user_name(user))
+
+
+# BOT COMMANDS
 
 @bot.command()
 async def echo(*, message):
@@ -108,9 +126,19 @@ async def _bot():
     await bot.say('Yes, the bot is cool.')
 
 
+@bot.command()
+async def citation():
+    random_citation = citations.get_random_citation()
+    logger.debug('Citation : %s', random_citation)
+    await bot.say(random_citation)
+
+
+# Main function
+
 if __name__ == '__main__':
     try:
-        bot.run(TOKEN)
+        logger.info('Preparing to run bot...')
+        bot.run(DISCORD_BOT_TOKEN)
     except Exception as e:
         import sys
 
