@@ -25,9 +25,7 @@ class ProgressPercentage(object):
         # to a single filename.
         with self._lock:
             self._seen_so_far += bytes_amount
-            logger.debug(
-                "\r%s --> %s bytes transferred" % (
-                    self._filename, self._seen_so_far))
+            logger.debug("%s --> %s bytes transferred", self._filename, self._seen_so_far)
 
 
 # Get the service client
