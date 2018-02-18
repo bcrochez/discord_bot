@@ -2,21 +2,16 @@ import os
 import random
 import logging
 
+from module import *
+import utils.logger_utils
+
 import discord
 from discord.ext import commands
 
 DISCORD_BOT_TOKEN = os.environ.get('TOKEN')
 
 # creating logger
-logger = logging.getLogger('discord bot')
-logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-ch.setFormatter(formatter)
-
-logger.addHandler(ch)
+logger = utils.logger_utils.get_logger('discord bot', logging.INFO)
 
 # creating bot
 bot = commands.Bot(command_prefix='!')
@@ -66,7 +61,7 @@ async def on_message(message):
 
 @bot.event
 async def on_typing(channel, user, when):
-    logger.info('%s - [TYPING] %s - %s', str(when), get_channel_name(channel), get_user_name(user))
+    logger.debug('%s - [TYPING] %s - %s', str(when), get_channel_name(channel), get_user_name(user))
 
 
 # BOT COMMANDS
@@ -129,6 +124,13 @@ async def cool(ctx):
 async def _bot():
     """Is the bot cool?"""
     await bot.say('Yes, the bot is cool.')
+
+
+@bot.command()
+async def citation():
+    random_citation = citations.get_random_citation()
+    logger.debug('Citation : %s', random_citation)
+    await bot.say(random_citation)
 
 
 # Main function
