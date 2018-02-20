@@ -4,9 +4,9 @@ import errno
 import logging
 
 import boto3
-import utils.logger_utils
+import utils.utils
 
-logger = utils.logger_utils.get_logger('aws', logging.DEBUG)
+logger = utils.utils.get_logger('aws', logging.DEBUG)
 
 S3_BUCKET = os.environ.get('S3_BUCKET')
 AWS_URL = 'http://s3.amazonaws.com/'
