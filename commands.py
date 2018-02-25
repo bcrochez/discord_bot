@@ -14,6 +14,10 @@ def get_commands(bot, logger):
         await bot.say(message)
 
     @bot.command()
+    async def tableflip():
+        await bot.say("(╯°□°）╯︵ ┻━┻")
+
+    @bot.command()
     async def add(left: int, right: int):
         """Adds two numbers together."""
         await bot.say(left + right)
