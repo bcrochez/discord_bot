@@ -86,5 +86,9 @@ def get_random_citation():
 
 
 def get_citation_by_theme(theme):
-    i = random.randint(0, len(citations[theme])-1)
-    return citations[theme][i]
+    try:
+        i = random.randint(0, len(citations[theme])-1)
+        citation = citations[theme][i]
+    except KeyError:
+        citation = "Le thème " + theme + " n'existe pas ! (thèmes disponible : " + str(names) + ")"
+    return citation

@@ -66,7 +66,10 @@ def get_commands(bot, logger):
         await bot.say('Yes, the bot is cool.')
 
     @bot.command()
-    async def citation():
-        random_citation = citations.get_random_citation()
+    async def citation(*theme):
+        if len(theme) > 0:
+            random_citation = citations.get_citation_by_theme(theme[0])
+        else:
+            random_citation = citations.get_random_citation()
         logger.debug('Citation : %s', random_citation)
         await bot.say(random_citation)
