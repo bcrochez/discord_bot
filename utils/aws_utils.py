@@ -4,9 +4,9 @@ import errno
 import logging
 
 import boto3
-import utils.logger_utils
+import utils.utils
 
-logger = utils.logger_utils.get_logger('aws', logging.DEBUG)
+logger = utils.utils.get_logger('aws', logging.DEBUG)
 
 S3_BUCKET = os.environ.get('S3_BUCKET')
 AWS_URL = 'http://s3.amazonaws.com/'
@@ -25,9 +25,7 @@ class ProgressPercentage(object):
         # to a single filename.
         with self._lock:
             self._seen_so_far += bytes_amount
-            logger.debug(
-                "\r%s --> %s bytes transferred" % (
-                    self._filename, self._seen_so_far))
+            logger.debug("%s --> %s bytes transferred", self._filename, self._seen_so_far)
 
 
 # Get the service client
