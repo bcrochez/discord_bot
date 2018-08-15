@@ -9,12 +9,13 @@ from module import *
 
 def get_commands(bot, logger):
 
-    @bot.command()
+    # @bot.command()
     async def echo(*, message):
         await bot.say(message)
 
     @bot.command()
     async def tableflip():
+        """Flips a table"""
         await bot.say("(╯°□°）╯︵ ┻━┻")
 
     @bot.command()
@@ -67,9 +68,16 @@ def get_commands(bot, logger):
 
     @bot.command()
     async def citation(*theme):
+        """Affiche une citation"""
         if len(theme) > 0:
             random_citation = citations.get_citation_by_theme(theme[0])
         else:
             random_citation = citations.get_random_citation()
         logger.debug('Citation : %s', random_citation)
         await bot.say(random_citation)
+
+    # @bot.command()
+    async def punir(member: discord.Member):
+        await  bot.say('{0.name} est puni(e) !'.format(member))
+
+
