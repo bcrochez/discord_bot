@@ -102,5 +102,7 @@ def get_commands(bot, logger):
 
         visible_emojis_count = sorted(visible_emojis_count, key=lambda v: v[1], reverse=True)
 
-        for visible_emoji in visible_emojis_count:
-            await bot.say(str(visible_emoji[0])+' a été utilisé '+str(visible_emoji[1])+' fois',)
+        i = 0
+        while i < 10 and i < len(visible_emojis_count):
+            await bot.say(str(visible_emojis_count[i][0])+' a été utilisé '+str(visible_emojis_count[i][1])+' fois',)
+            i += 1
