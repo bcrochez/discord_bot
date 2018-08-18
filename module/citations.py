@@ -5,10 +5,9 @@ import random
 
 import utils.aws_utils as s3
 import utils.utils
+import utils.constants as const
 
 logger = utils.utils.get_logger('citations', logging.DEBUG)
-
-TMP_PATH = '/tmp'
 
 random.seed()
 
@@ -23,7 +22,7 @@ def load_citations():
     citations = {}
     error_names = []
     for name in names:
-        filename = name + '.txt'
+        filename = 'citations/' + name + '.txt'
         try:
             s3.download_file(filename)
         except Exception as e:
@@ -32,7 +31,7 @@ def load_citations():
             continue
 
         try:
-            f = open(TMP_PATH+'/'+filename, encoding='utf-8')
+            f = open(const.TMP_PATH+'/'+filename, encoding='utf-8')
         except Exception as e:
             logger.warning("*** impossible d'ouvrir: %s *** - %s", name, e)
             error_names.append(name)
@@ -60,7 +59,7 @@ def load_cita_theme(theme):
     if theme not in names:
         names.append(theme)
     try:
-        f = open(TMP_PATH+'/'+theme+'.txt', encoding='utf-8')
+        f = open(const.TMP_PATH+'/'+theme+'.txt', encoding='utf-8')
     except Exception as e:
         names.remove(theme)
         logger.warning("*** impossible d'ouvrir: %s *** - %s", theme, e)
