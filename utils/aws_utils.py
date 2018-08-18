@@ -39,3 +39,10 @@ def download_file(filename):
     s3.download_file(S3_BUCKET, filename, tmp_filename,
                      Callback=ProgressPercentage(tmp_filename))
     logger.debug('%s downloaded', filename)
+
+
+def upload_file(filename):
+    tmp_filename = const.TMP_PATH+'/'+filename
+    logger.debug('Trying to upload %s to %s into bucket %s', tmp_filename, filename, S3_BUCKET)
+    s3.upload_file(tmp_filename, S3_BUCKET, filename)
+    logger.debug('%s uploaded', filename)
