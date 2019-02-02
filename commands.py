@@ -93,7 +93,11 @@ def get_commands(bot, logger):
             logger.warning('Download error - %s', e)
             return
 
-        emoji_count = utils.utils.count_emoji_by_server(id_server, logger)
+        if ctx.message.mentions:
+            id_member = ctx.message.mentions[0].id
+            emoji_count = utils.utils.count_emoji_by_server_and_nick(id_server, id_member, logger)
+        else:
+            emoji_count = utils.utils.count_emoji_by_server(id_server, logger)
         visible_emojis = bot.get_all_emojis()
         visible_emojis_count = []
         for emoji in visible_emojis:

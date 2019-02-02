@@ -44,14 +44,9 @@ def get_channel_name(channel):
 
 
 def count_emoji_by_server(id_server, logger):
-    try:
-        f = open(const.TMP_PATH + '/' + const.STATS_FILE_PATH, 'r+', encoding='utf-8')
-    except Exception as e:
-        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.STATS_FILE_PATH, e)
+    emoji_stats = get_emoji_stat(logger)
+    if emoji_stats is None:
         return
-
-    emoji_stats = ast.literal_eval(f.read())
-    f.close()
 
     emoji_count = {}
     if id_server in emoji_stats:
@@ -64,3 +59,34 @@ def count_emoji_by_server(id_server, logger):
 
     logger.debug(emoji_count)
     return emoji_count
+
+
+def count_emoji_by_server_and_nick(id_server, id_member, logger):
+    emoji_stats = get_emoji_stat(logger)
+    if emoji_stats is None:
+        return
+
+    emoji_count = {}
+    if id_server in emoji_stats:
+        if id_member in emoji_stats[id_server]:
+            for id_emoji in emoji_stats[id_server][id_member]:
+                if id_emoji in emoji_count:
+                    emoji_count[id_emoji] += emoji_stats[id_server][id_member][id_emoji]
+                else:
+                    emoji_count[id_emoji] = emoji_stats[id_server][id_member][id_emoji]
+
+    logger.debug(emoji_count)
+    return emoji_count
+
+
+def get_emoji_stat(logger):
+    try:
+        f = open(const.TMP_PATH + '/' + const.STATS_FILE_PATH, 'r+', encoding='utf-8')
+    except Exception as e:
+        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.STATS_FILE_PATH, e)
+        return None
+
+    emoji_stats = ast.literal_eval(f.read())
+    f.close()
+
+    return emoji_stats
