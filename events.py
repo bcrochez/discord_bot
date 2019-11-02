@@ -29,7 +29,6 @@ def get_events(bot, logger):
 
     @bot.event
     async def on_message(message):
-        logger.info("new message")
         name = utils.get_user_name(message.author)
         channel = utils.get_channel_name(message.channel)
         logger.info("%s - [MESSAGE] %s - %s : %s", message.created_at, channel, name, message.content)
@@ -44,8 +43,8 @@ def get_events(bot, logger):
 
 def count_emoji(message, logger):
     if message.guild is not None:
-        id_server = message.guild.id
-        id_member = message.author.id
+        id_server = str(message.guild.id)
+        id_member = str(message.author.id)
         emoji_list = []
 
         for word in message.content.split(' '):
