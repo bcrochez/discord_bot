@@ -1,4 +1,6 @@
 import utils.utils as utils
+import utils.emoji_utils as emoji_utils
+import module.quiz as quiz
 
 
 # EVENTS
@@ -12,11 +14,11 @@ def get_events(bot, logger):
         logger.info(bot.user.id)
         logger.info('------')
         # listing servers
-        servers = bot.servers
-        if len(servers) != 0:
+        guilds = bot.guilds
+        if len(guilds) != 0:
             logger.info("Joined servers : ")
-            for server in servers:
-                logger.info("\t- %s owned by %s", server.name, server.owner.name)
+            for guild in guilds:
+                logger.info("\t- %s owned by %s", guild.name, guild.owner.name)
         else:
             logger.info("No server joined")
 
@@ -26,7 +28,10 @@ def get_events(bot, logger):
     async def on_message(message):
         name = utils.get_user_name(message.author)
         channel = utils.get_channel_name(message.channel)
-        logger.info("%s - [MESSAGE] %s - %s : %s", message.timestamp, channel, name, message.content)
+        logger.info("%s - [MESSAGE] %s - %s : %s", message.created_at, channel, name, message.content)
+        if message.author.id != bot.user.id:
+            emoji_utils.count_emoji(message, logger)
+            await quiz.parse_answer(message)
         await bot.process_commands(message)
 
     @bot.event
