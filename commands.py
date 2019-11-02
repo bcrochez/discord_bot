@@ -104,3 +104,19 @@ def get_commands(bot, logger):
         while i < 10 and i < len(visible_emojis_count):
             await ctx.send(str(visible_emojis_count[i][0])+' a été utilisé '+str(visible_emojis_count[i][1])+' fois',)
             i += 1
+
+    # Quiz part here, don't touch if you don't know what you are doing
+    @bot.command()
+    async def startquiz(ctx, *number):
+        """Démarre le quiz"""
+        await quiz.start_quiz(ctx, number)
+
+    @bot.command()
+    async def statsquiz(ctx):
+        """Affiche les scores du quiz"""
+        await ctx.send('Affichage des meilleurs joueurs du quiz.')
+
+    @bot.command()
+    async def stopquiz(ctx):
+        """Arrête le quiz"""
+        await quiz.stop_quiz(ctx)

@@ -1,5 +1,6 @@
 import utils.utils as utils
 import utils.emoji_utils as emoji_utils
+import module.quiz as quiz
 
 
 # EVENTS
@@ -30,6 +31,7 @@ def get_events(bot, logger):
         logger.info("%s - [MESSAGE] %s - %s : %s", message.created_at, channel, name, message.content)
         if message.author.id != bot.user.id:
             emoji_utils.count_emoji(message, logger)
+            await quiz.parse_answer(message)
         await bot.process_commands(message)
 
     @bot.event
