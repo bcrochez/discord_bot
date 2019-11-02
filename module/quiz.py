@@ -26,7 +26,7 @@ async def start_quiz(ctx, number):
 
 
 async def stop_quiz(ctx):
-    await quiz.stop(ctx)
+    await quiz.stop(ctx.message.channel)
 
 
 async def parse_answer(message):
