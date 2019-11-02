@@ -17,11 +17,11 @@ def get_events(bot, logger):
         logger.info(bot.user.id)
         logger.info('------')
         # listing servers
-        servers = bot.servers
-        if len(servers) != 0:
+        guilds = bot.guilds
+        if len(guilds) != 0:
             logger.info("Joined servers : ")
-            for server in servers:
-                logger.info("\t- %s owned by %s", server.name, server.owner.name)
+            for guild in guilds:
+                logger.info("\t- %s owned by %s", guild.name, guild.owner.name)
         else:
             logger.info("No server joined")
 
@@ -29,9 +29,10 @@ def get_events(bot, logger):
 
     @bot.event
     async def on_message(message):
+        logger.info("new message")
         name = utils.get_user_name(message.author)
         channel = utils.get_channel_name(message.channel)
-        logger.info("%s - [MESSAGE] %s - %s : %s", message.timestamp, channel, name, message.content)
+        logger.info("%s - [MESSAGE] %s - %s : %s", message.created_at, channel, name, message.content)
         if message.author.id != bot.user.id:
             count_emoji(message, logger)
         await bot.process_commands(message)
@@ -42,8 +43,8 @@ def get_events(bot, logger):
 
 
 def count_emoji(message, logger):
-    if message.server is not None:
-        id_server = message.server.id
+    if message.guild is not None:
+        id_server = message.guild.id
         id_member = message.author.id
         emoji_list = []
 
