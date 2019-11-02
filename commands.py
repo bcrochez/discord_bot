@@ -3,9 +3,7 @@ import random
 import discord
 
 from module import *
-import utils.utils as utils
-import utils.constants as const
-import utils.aws_utils as s3
+import utils.emoji_utils as emoji_utils
 
 
 # BOT COMMANDS
@@ -85,19 +83,15 @@ def get_commands(bot, logger):
 
     @bot.command(pass_context=True)
     async def count(ctx):
+        """Compte le nombre d'emoji utilisé"""
         id_server = str(ctx.guild.id)
-        # FIXME move this try/catch
-        try:
-            s3.download_file(const.STATS_FILE_PATH)
-        except Exception as e:
-            logger.warning('Download error - %s', e)
-            return
+        emoji_utils.download_emoji_file(logger)
 
         if ctx.message.mentions:
             id_member = str(ctx.message.mentions[0].id)
-            emoji_count = utils.count_emoji_by_server_and_nick(id_server, id_member, logger)
+            emoji_count = emoji_utils.count_emoji_by_server_and_nick(id_server, id_member, logger)
         else:
-            emoji_count = utils.count_emoji_by_server(id_server, logger)
+            emoji_count = emoji_utils.count_emoji_by_server(id_server, logger)
         visible_emojis = bot.emojis
         visible_emojis_count = []
         for emoji in visible_emojis:

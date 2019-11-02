@@ -3,13 +3,12 @@ import threading
 import logging
 
 import boto3
-import utils.utils
+import utils.utils as utils
 import utils.constants as const
 
-logger = utils.utils.get_logger('aws', logging.DEBUG)
+logger = utils.get_logger('aws', logging.DEBUG)
 
 S3_BUCKET = os.environ.get('S3_BUCKET')
-AWS_URL = 'http://s3.amazonaws.com/'
 
 
 class ProgressPercentage(object):
@@ -29,12 +28,12 @@ class ProgressPercentage(object):
 # Get the service client
 s3 = boto3.client('s3')
 
-utils.utils.make_dir(const.TMP_PATH)
+utils.make_dir(const.TMP_PATH)
 
 
 def download_file(filename):
     tmp_filename = const.TMP_PATH+'/'+filename
-    utils.utils.make_dir(os.path.dirname(tmp_filename))
+    utils.make_dir(os.path.dirname(tmp_filename))
     logger.debug('Trying to download %s to %s from bucket %s', filename, tmp_filename, S3_BUCKET)
     s3.download_file(S3_BUCKET, filename, tmp_filename,
                      Callback=ProgressPercentage(tmp_filename))
