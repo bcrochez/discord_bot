@@ -208,10 +208,11 @@ class Quiz:
                 await message.channel.send(
                     "Bonne réponse de " + champ.mention + " ! (" + self.current.answer.strip() + ")"
                 )
-                save_score(str(champ.id))
 
                 self.remaining_question -= 1
                 self.current = None
+
+                save_score(str(champ.id))
 
                 await self.askqst(message.channel)
 

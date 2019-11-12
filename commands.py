@@ -123,7 +123,7 @@ def get_commands(bot, logger):
         visible_members_score = []
         for member in guild.members:
             if str(member.id) in quiz_score:
-                visible_members_score.append([member.nick, quiz_score[str(member.id)]])
+                visible_members_score.append([member.nick if member.nick is not None else member.name, quiz_score[str(member.id)]])
 
         if len(visible_members_score) == 0:
             await ctx.send("Aucun score d'enregistré !")
