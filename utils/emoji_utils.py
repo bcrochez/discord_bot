@@ -7,7 +7,7 @@ import utils.constants as const
 
 def download_emoji_file(logger):
     try:
-        s3.download_file(const.STATS_FILE_PATH)
+        s3.download_file(const.EMOJI_COUNT_FILE_PATH)
     except Exception as e:
         logger.warning('Download error - %s', e)
         return
@@ -30,9 +30,9 @@ def count_emoji(message, logger):
             download_emoji_file(logger)
 
             try:
-                f = open(const.TMP_PATH + '/' + const.STATS_FILE_PATH, 'r+', encoding='utf-8')
+                f = open(const.TMP_PATH + '/' + const.EMOJI_COUNT_FILE_PATH, 'r+', encoding='utf-8')
             except Exception as e:
-                logger.warning("*** impossible d'ouvrir: %s *** - %s", const.STATS_FILE_PATH, e)
+                logger.warning("*** impossible d'ouvrir: %s *** - %s", const.EMOJI_COUNT_FILE_PATH, e)
                 return
 
             emoji_stats = ast.literal_eval(f.read())
@@ -53,7 +53,7 @@ def count_emoji(message, logger):
             f.close()
 
             try:
-                s3.upload_file(const.STATS_FILE_PATH)
+                s3.upload_file(const.EMOJI_COUNT_FILE_PATH)
             except Exception as e:
                 logger.warning('Upload error - %s', e)
                 return
@@ -104,9 +104,9 @@ def count_emoji_by_server_and_nick(id_server, id_member, logger):
 
 def get_emoji_stat(logger):
     try:
-        f = open(const.TMP_PATH + '/' + const.STATS_FILE_PATH, 'r+', encoding='utf-8')
+        f = open(const.TMP_PATH + '/' + const.EMOJI_COUNT_FILE_PATH, 'r+', encoding='utf-8')
     except Exception as e:
-        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.STATS_FILE_PATH, e)
+        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.EMOJI_COUNT_FILE_PATH, e)
         return None
 
     emoji_stats = ast.literal_eval(f.read())
