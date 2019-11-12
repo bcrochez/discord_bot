@@ -14,6 +14,7 @@ def download_emoji_file(logger):
 
 
 def count_emoji(message, logger):
+    """Saves emoji count to server"""
     if message.guild is not None:
         id_server = str(message.guild.id)
         id_member = str(message.author.id)

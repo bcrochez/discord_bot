@@ -1,5 +1,6 @@
 # -*-coding:UTF-8 -*
 
+import ast
 import asyncio
 import random
 import logging
@@ -31,6 +32,69 @@ async def stop_quiz(ctx):
 
 async def parse_answer(message):
     await quiz.parse_answer(message)
+
+
+def get_score():
+    try:
+        f = open(const.TMP_PATH + '/' + const.QUIZ_SCORE_FILE_PATH, 'r+', encoding='utf-8')
+    except Exception as e:
+        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.EMOJI_COUNT_FILE_PATH, e)
+        return
+
+    quiz_score = ast.literal_eval(f.read())
+    f.close()
+
+    return quiz_score
+
+
+def save_score(user_id):
+    download_score_file()
+
+    try:
+        f = open(const.TMP_PATH + '/' + const.QUIZ_SCORE_FILE_PATH, 'r+', encoding='utf-8')
+    except Exception as e:
+        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.EMOJI_COUNT_FILE_PATH, e)
+        return
+
+    quiz_score = ast.literal_eval(f.read())
+    if user_id not in quiz_score:
+        quiz_score[user_id] = 1
+    else:
+        quiz_score[user_id] += 1
+
+    logger.debug(str(quiz_score))
+    f.seek(0, 0)
+    f.write(str(quiz_score))
+    f.close()
+
+    try:
+        s3.upload_file(const.QUIZ_SCORE_FILE_PATH)
+    except Exception as e:
+        logger.warning('Upload error - %s', e)
+        return
+
+
+def download_score_file():
+    try:
+        s3.download_file(const.QUIZ_SCORE_FILE_PATH)
+    except Exception as e:
+        logger.warning('Download error - %s', e)
+        return
+
+
+def get_hint(answer):
+    hint = ""
+    if len(answer) == 1:
+        return "\\*"
+    for c in answer:
+        if c == " ":
+            hint += c
+            continue
+        if random.randint(0, 1):
+            hint += "\\*"
+        else:
+            hint += c
+    return hint
 
 
 class Quiz:
@@ -90,7 +154,7 @@ class Quiz:
             self.current_channel = ctx.message.channel.id
             self.remaining_question = self.default
 
-            await ctx.send('@here\n:loudspeaker:\n**Début du quiz dans 1 minute.**')
+            await ctx.send('@here\n:loudspeaker: **Début du quiz dans 1 minute.**')
             await ctx.send(str(self.default) + ' question(s) dans le quiz')
             await asyncio.sleep(45)
             await self.askqst(ctx.message.channel)
@@ -110,7 +174,7 @@ class Quiz:
     async def askqst(self, channel):
         if self.__running:
             if self.remaining_question > 0 and len(self.current_questions) > 0:
-                await channel.send(':loudspeaker:\n**Prochaine question dans 15 secondes.** (' +
+                await channel.send(':loudspeaker: **Prochaine question dans 15 secondes.** (' +
                                    str(self.remaining_question) + ' question(s) restante(s))')
                 await asyncio.sleep(15)
 
@@ -121,10 +185,14 @@ class Quiz:
 
                 await channel.send("Question : " + self.current.question.strip())
                 await asyncio.sleep(45)
+
                 if self.current is not None and self.current.question == local_current.question:
-                    await channel.send("Il vous reste 15 secondes !")
+                    # if it remains 15 seconds a hint is given
+                    await channel.send("Il vous reste 15 secondes ! Indice : " + get_hint(self.current.answer.strip()))
                     await asyncio.sleep(15)
+
                     if self.current is not None and self.current.question == local_current.question:
+                        # if time is up asks next question
                         await channel.send("La bonne réponse était : " + self.current.answer.strip())
                         self.remaining_question -= 1
                         self.current = None
@@ -136,10 +204,15 @@ class Quiz:
     async def parse_answer(self, message):
         if self.__running and self.current_channel == message.channel.id:
             if self.current is not None and self.current.answer.lower().strip() == message.content.lower().strip():
+                champ = message.author
+                await message.channel.send(
+                    "Bonne réponse de " + champ.mention + " ! (" + self.current.answer.strip() + ")"
+                )
+                save_score(str(champ.id))
+
                 self.remaining_question -= 1
                 self.current = None
 
-                await message.channel.send("Bonne réponse !")
                 await self.askqst(message.channel)
 
 
