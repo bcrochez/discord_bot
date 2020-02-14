@@ -1,5 +1,6 @@
 TMP_PATH = '/tmp'
-STATS_FILE_PATH = 'stats/stats'
-QUIZ_PATH = 'quizz/quizz_database.txt'
+EMOJI_COUNT_FILE_PATH = 'stats/emoji_count'
+QUIZ_SCORE_FILE_PATH = 'stats/quiz_score'
+QUIZ_PATH = 'quizz/quizofficial.csv'
 EMOJI_PATTERN = '<:(.+):([0-9]+)>'
 AWS_URL = 'http://s3.amazonaws.com/'

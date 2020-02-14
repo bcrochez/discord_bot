@@ -114,7 +114,26 @@ def get_commands(bot, logger):
     @bot.command()
     async def statsquiz(ctx):
         """Affiche les scores du quiz"""
-        await ctx.send('Affichage des meilleurs joueurs du quiz.')
+        quiz.download_score_file()
+        quiz_score = quiz.get_score()
+        if quiz_score is None:
+            return
+
+        guild = ctx.message.guild
+        visible_members_score = []
+        for member in guild.members:
+            if str(member.id) in quiz_score:
+                visible_members_score.append([member.nick if member.nick is not None else member.name, quiz_score[str(member.id)]])
+
+        if len(visible_members_score) == 0:
+            await ctx.send("Aucun score d'enregistré !")
+        else:
+            visible_members_score = sorted(visible_members_score, key=lambda v: v[1], reverse=True)
+
+            i = 0
+            while i < 10 and i < len(visible_members_score):
+                await ctx.send(str(visible_members_score[i][0])+' : '+str(visible_members_score[i][1])+' point(s)',)
+                i += 1
 
     @bot.command()
     async def stopquiz(ctx):
