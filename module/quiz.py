@@ -137,15 +137,15 @@ class Quiz:
         if len(number) > 0 and int(number[0]) > 0:
             self.default = int(number[0])
         elif len(number) > 0:
-            await ctx.send('Le nombre de question doit être supérieur ou égal à 1.')
+            await ctx.send(':warning: Le nombre de question doit être supérieur ou égal à 1.')
             return
 
         if self.__running:
             if ctx.message.channel.id != self.current_channel:
-                await ctx.send('Un quiz est déjà en cours sur un autre canal, veuillez attendre la fin de celui-ci '
+                await ctx.send(':warning: Un quiz est déjà en cours sur un autre canal, veuillez attendre la fin de celui-ci '
                                'pour lancer un quiz.')
             else:
-                await ctx.send('Un quiz est déjà en cours, veuillez attendre la fin de celui-ci pour lancer un quiz.')
+                await ctx.send(':warning: Un quiz est déjà en cours, veuillez attendre la fin de celui-ci pour lancer un quiz.')
         else:
             self.__running = True
             self.current = None
@@ -162,13 +162,13 @@ class Quiz:
     # stops quiz and init values
     async def stop(self, channel):
         if self.__running and self.current_channel == channel.id:
-            await channel.send('Arrêt du quiz en cours. Pour en relancer un !startquiz')
+            await channel.send(':octagonal_sign: Arrêt du quiz en cours. Pour en relancer un !startquiz')
             self.__running = False
             self.current_channel = None
             self.current = None
             self.default = 10
         else:
-            await channel.send('Aucun quiz en cours. !startquiz pour en lancer un.')
+            await channel.send(':warning: Aucun quiz en cours. !startquiz pour en lancer un.')
 
     # asks a question
     async def askqst(self, channel):
@@ -183,22 +183,22 @@ class Quiz:
                 self.current = local_current
                 self.current_questions.remove(local_current)
 
-                await channel.send("Question : " + self.current.question.strip())
+                await channel.send(":arrow_right: **Question :** " + self.current.question.strip())
                 await asyncio.sleep(45)
 
                 if self.current is not None and self.current.question == local_current.question:
                     # if it remains 15 seconds a hint is given
-                    await channel.send("Il vous reste 15 secondes ! Indice : " + get_hint(self.current.answer.strip()))
+                    await channel.send(":hourglass_flowing_sand: Il vous reste 15 secondes !\n:arrow_right: **Indice :** " + get_hint(self.current.answer.strip()))
                     await asyncio.sleep(15)
 
                     if self.current is not None and self.current.question == local_current.question:
                         # if time is up asks next question
-                        await channel.send("La bonne réponse était : " + self.current.answer.strip())
+                        await channel.send(":x: **La bonne réponse était :** " + self.current.answer.strip())
                         self.remaining_question -= 1
                         self.current = None
                         await self.askqst(channel)
             else:
-                await channel.send('Toutes les questions ont été jouées !')
+                await channel.send(':hourglass: **Toutes les questions ont été jouées !**')
                 await self.stop(channel)
 
     async def parse_answer(self, message):
@@ -206,7 +206,7 @@ class Quiz:
             if self.current is not None and self.current.answer.lower().strip() == message.content.lower().strip():
                 champ = message.author
                 await message.channel.send(
-                    "Bonne réponse de " + champ.mention + " ! (" + self.current.answer.strip() + ")"
+                    ":white_check_mark: **Bonne réponse de** " + champ.mention + " ! (" + self.current.answer.strip() + ")"
                 )
 
                 self.remaining_question -= 1
