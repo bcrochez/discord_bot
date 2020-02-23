@@ -15,7 +15,7 @@ logger = utils.utils.get_logger('discord bot', logging.INFO)
 
 # creating bot
 bot = commands.Bot(command_prefix='!')
-cmd.get_commands(bot, logger)
+cmd.get_commands(bot)
 events.get_events(bot, logger)
 
 

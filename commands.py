@@ -1,14 +1,42 @@
+import ast
+import logging
 import random
 
 import discord
 
 from module import *
+import utils.aws_utils as s3
+import utils.constants as const
 import utils.emoji_utils as emoji_utils
+import utils.utils as utils
+
+logger = utils.get_logger('commands', logging.INFO)
+
+
+def load_admins():
+    try:
+        s3.download_file(const.ADMINS_ID)
+    except Exception as e:
+        logger.warning('Download error - %s', e)
+        return []
+    try:
+        f = open(const.TMP_PATH + '/' + const.ADMINS_ID, 'r+', encoding='utf-8')
+    except Exception as e:
+        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.ADMINS_ID, e)
+        return []
+
+    admins_content = ast.literal_eval(f.read())
+    f.close()
+
+    return admins_content
+
+
+admins = load_admins()
 
 
 # BOT COMMANDS
 
-def get_commands(bot, logger):
+def get_commands(bot):
 
     # @bot.command()
     # async def echo(ctx, *, message):
@@ -109,7 +137,10 @@ def get_commands(bot, logger):
     @bot.command()
     async def startquiz(ctx, *number):
         """Démarre le quiz"""
-        await quiz.start_quiz(ctx, number)
+        if ctx.member.id in admins:
+            await quiz.start_quiz(ctx, number)
+        else:
+            await ctx.send(':warning: Seul un admin peut lancer le quiz.')
 
     @bot.command()
     async def statsquiz(ctx):

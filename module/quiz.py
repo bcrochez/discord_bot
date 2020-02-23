@@ -38,7 +38,7 @@ def get_score():
     try:
         f = open(const.TMP_PATH + '/' + const.QUIZ_SCORE_FILE_PATH, 'r+', encoding='utf-8')
     except Exception as e:
-        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.EMOJI_COUNT_FILE_PATH, e)
+        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.QUIZ_SCORE_FILE_PATH, e)
         return
 
     quiz_score = ast.literal_eval(f.read())
@@ -53,7 +53,7 @@ def save_score(user_id):
     try:
         f = open(const.TMP_PATH + '/' + const.QUIZ_SCORE_FILE_PATH, 'r+', encoding='utf-8')
     except Exception as e:
-        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.EMOJI_COUNT_FILE_PATH, e)
+        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.QUIZ_SCORE_FILE_PATH, e)
         return
 
     quiz_score = ast.literal_eval(f.read())
