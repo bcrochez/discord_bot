@@ -137,7 +137,7 @@ def get_commands(bot):
     @bot.command()
     async def startquiz(ctx, *number):
         """Démarre le quiz"""
-        if ctx.message.author.id in admins:
+        if str(ctx.message.author.id) in admins:
             await quiz.start_quiz(ctx, number)
         else:
             await ctx.send(':warning: Seul un admin peut lancer le quiz.')
@@ -169,7 +169,7 @@ def get_commands(bot):
     @bot.command()
     async def stopquiz(ctx):
         """Arrête le quiz"""
-        if ctx.message.author.id in admins:
+        if str(ctx.message.author.id) in admins:
             await quiz.stop_quiz(ctx)
         else:
             await ctx.send(':warning: Seul un admin peut lancer le quiz.')

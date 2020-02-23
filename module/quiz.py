@@ -142,10 +142,11 @@ class Quiz:
 
         if self.__running:
             if ctx.message.channel.id != self.current_channel:
-                await ctx.send(':warning: Un quiz est déjà en cours sur un autre canal, veuillez attendre la fin de celui-ci '
-                               'pour lancer un quiz.')
+                await ctx.send(':warning: Un quiz est déjà en cours sur un autre canal, veuillez attendre la fin de '
+                               'celui-ci pour lancer un quiz.')
             else:
-                await ctx.send(':warning: Un quiz est déjà en cours, veuillez attendre la fin de celui-ci pour lancer un quiz.')
+                await ctx.send(':warning: Un quiz est déjà en cours, veuillez attendre la fin de celui-ci pour '
+                               'lancer un quiz.')
         else:
             self.__running = True
             self.current = None
@@ -188,7 +189,8 @@ class Quiz:
 
                 if self.current is not None and self.current.question == local_current.question:
                     # if it remains 15 seconds a hint is given
-                    await channel.send(":hourglass_flowing_sand: Il vous reste 15 secondes !\n:arrow_right: **Indice :** " + get_hint(self.current.answer.strip()))
+                    await channel.send(":hourglass_flowing_sand: Il vous reste 15 secondes !")
+                    await channel.send(":arrow_right: **Indice :** " + get_hint(self.current.answer.strip()))
                     await asyncio.sleep(15)
 
                     if self.current is not None and self.current.question == local_current.question:
