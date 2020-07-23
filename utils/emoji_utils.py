@@ -82,6 +82,7 @@ def count_emoji_by_server(id_server, logger):
     return emoji_count
 
 
+# count emoji by server id and by id member
 def count_emoji_by_server_and_nick(id_server, id_member, logger):
     # open stat file
     emoji_stats = get_emoji_stat(logger)
@@ -98,6 +99,27 @@ def count_emoji_by_server_and_nick(id_server, id_member, logger):
                     emoji_count[id_emoji] += emoji_stats[id_server][id_member][id_emoji]
                 else:
                     emoji_count[id_emoji] = emoji_stats[id_server][id_member][id_emoji]
+
+    logger.debug(emoji_count)
+    return emoji_count
+
+
+# count emoji by id emojir
+def count_emoji_by_emoji_id(id_emoji, logger):
+    # open stat file
+    emoji_stats = get_emoji_stat(logger)
+    # if file is empty
+    if emoji_stats is None:
+        return
+
+    emoji_count = {}
+    for id_server in emoji_stats:
+        for id_member in emoji_stats[id_server]:
+            if id_emoji in emoji_stats[id_server][id_member]:
+                if id_member in emoji_count:
+                    emoji_count[id_member] += emoji_stats[id_server][id_member][id_emoji]
+                else:
+                    emoji_count[id_member] = emoji_stats[id_server][id_member][id_emoji]
 
     logger.debug(emoji_count)
     return emoji_count

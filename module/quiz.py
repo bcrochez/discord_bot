@@ -38,7 +38,7 @@ def get_score():
     try:
         f = open(const.TMP_PATH + '/' + const.QUIZ_SCORE_FILE_PATH, 'r+', encoding='utf-8')
     except Exception as e:
-        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.EMOJI_COUNT_FILE_PATH, e)
+        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.QUIZ_SCORE_FILE_PATH, e)
         return
 
     quiz_score = ast.literal_eval(f.read())
@@ -53,7 +53,7 @@ def save_score(user_id):
     try:
         f = open(const.TMP_PATH + '/' + const.QUIZ_SCORE_FILE_PATH, 'r+', encoding='utf-8')
     except Exception as e:
-        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.EMOJI_COUNT_FILE_PATH, e)
+        logger.warning("*** impossible d'ouvrir: %s *** - %s", const.QUIZ_SCORE_FILE_PATH, e)
         return
 
     quiz_score = ast.literal_eval(f.read())
@@ -109,6 +109,7 @@ class Quiz:
         self.current_questions = []
         self.current_channel = None
         self.current = None
+        self.answered = False
         self.remaining_question = 0
 
         self.loadquestions()
@@ -141,28 +142,29 @@ class Quiz:
             return
 
         if self.__running:
-            if ctx.message.channel.id != self.current_channel:
-                await ctx.send(':warning: Un quiz est déjà en cours sur un autre canal, veuillez attendre la fin de celui-ci '
-                               'pour lancer un quiz.')
+            if ctx.message.channel.id != self.current_channel.id:
+                await ctx.send(':warning: Un quiz est déjà en cours sur un autre canal, veuillez attendre la fin de '
+                               'celui-ci pour lancer un quiz.')
             else:
-                await ctx.send(':warning: Un quiz est déjà en cours, veuillez attendre la fin de celui-ci pour lancer un quiz.')
+                await ctx.send(':warning: Un quiz est déjà en cours, veuillez attendre la fin de celui-ci pour '
+                               'lancer un quiz.')
         else:
             self.__running = True
             self.current = None
             # copy all question to current_question
             self.current_questions = self.questions
-            self.current_channel = ctx.message.channel.id
+            self.current_channel = ctx.message.channel
             self.remaining_question = self.default
 
             await ctx.send('@here\n:loudspeaker: **Début du quiz dans 1 minute.**')
             await ctx.send(str(self.default) + ' question(s) dans le quiz')
             await asyncio.sleep(45)
-            await self.askqst(ctx.message.channel)
+            await self.askqst()
 
     # stops quiz and init values
     async def stop(self, channel):
-        if self.__running and self.current_channel == channel.id:
-            await channel.send(':octagonal_sign: Arrêt du quiz en cours. Pour en relancer un !startquiz')
+        if self.__running and self.current_channel.id == channel.id:
+            await self.current_channel.send(':octagonal_sign: Arrêt du quiz en cours. Pour en relancer un !startquiz')
             self.__running = False
             self.current_channel = None
             self.current = None
@@ -171,50 +173,62 @@ class Quiz:
             await channel.send(':warning: Aucun quiz en cours. !startquiz pour en lancer un.')
 
     # asks a question
-    async def askqst(self, channel):
+    async def askqst(self):
         if self.__running:
-            if self.remaining_question > 0 and len(self.current_questions) > 0:
-                await channel.send(':loudspeaker: **Prochaine question dans 15 secondes.** (' +
+            if self.current is None and self.remaining_question > 0 and len(self.current_questions) > 0:
+                await self.current_channel.send(':loudspeaker: **Prochaine question dans 15 secondes.** (' +
                                    str(self.remaining_question) + ' question(s) restante(s))')
                 await asyncio.sleep(15)
 
-                qpos = random.randint(0, len(self.current_questions) - 1)
-                local_current = self.current_questions[qpos]
-                self.current = local_current
-                self.current_questions.remove(local_current)
-
-                await channel.send(":arrow_right: **Question :** " + self.current.question.strip())
-                await asyncio.sleep(45)
-
-                if self.current is not None and self.current.question == local_current.question:
-                    # if it remains 15 seconds a hint is given
-                    await channel.send(":hourglass_flowing_sand: Il vous reste 15 secondes !\n:arrow_right: **Indice :** " + get_hint(self.current.answer.strip()))
-                    await asyncio.sleep(15)
-
-                    if self.current is not None and self.current.question == local_current.question:
-                        # if time is up asks next question
-                        await channel.send(":x: **La bonne réponse était :** " + self.current.answer.strip())
-                        self.remaining_question -= 1
-                        self.current = None
-                        await self.askqst(channel)
+                await self.ask_question()
             else:
-                await channel.send(':hourglass: **Toutes les questions ont été jouées !**')
-                await self.stop(channel)
+                await self.current_channel.send(':hourglass: **Toutes les questions ont été jouées !**')
+                await self.stop(self.current_channel)
+
+    async def ask_question(self):
+        if self.__running and self.current is None and self.remaining_question > 0 and len(self.current_questions) > 0:
+            qpos = random.randint(0, len(self.current_questions) - 1)
+            local_current = self.current_questions[qpos]
+            self.current = local_current
+            self.current_questions.remove(local_current)
+
+            await self.current_channel.send(":arrow_right: **Question :** " + self.current.question.strip())
+            await asyncio.sleep(45)
+            await self.show_hint(local_current)
+
+    async def show_hint(self, local_current):
+        if self.__running and self.current is not None and self.current.question == local_current.question:
+            # if it remains 15 seconds a hint is given
+            await self.current_channel.send(":hourglass_flowing_sand: Il vous reste 15 secondes !")
+            await self.current_channel.send(":arrow_right: **Indice :** " + get_hint(self.current.answer.strip()))
+            await asyncio.sleep(15)
+
+            await self.show_answer(local_current)
+
+    async def show_answer(self, local_current):
+        if self.__running and self.current is not None and self.current.question == local_current.question:
+            # if time is up asks next question
+            await self.current_channel.send(":x: **La bonne réponse était :** " + self.current.answer.strip())
+            self.remaining_question -= 1
+            self.current = None
+            await self.askqst()
 
     async def parse_answer(self, message):
-        if self.__running and self.current_channel == message.channel.id:
-            if self.current is not None and self.current.answer.lower().strip() == message.content.lower().strip():
-                champ = message.author
-                await message.channel.send(
-                    ":white_check_mark: **Bonne réponse de** " + champ.mention + " ! (" + self.current.answer.strip() + ")"
-                )
+        if self.__running and not self.answered and self.current_channel.id == message.channel.id and \
+                self.current is not None and self.current.answer.lower().strip() == message.content.lower().strip():
+            self.answered = True
+            champ = message.author
+            await message.channel.send(
+                ":white_check_mark: **Bonne réponse de** " + champ.mention + " ! (" + self.current.answer.strip() + ")"
+            )
 
-                self.remaining_question -= 1
-                self.current = None
+            self.remaining_question -= 1
+            self.current = None
+            self.answered = False
 
-                save_score(str(champ.id))
+            save_score(str(champ.id))
 
-                await self.askqst(message.channel)
+            await self.askqst()
 
 
 class Question:
