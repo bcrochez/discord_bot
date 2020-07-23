@@ -1,6 +1,7 @@
 import ast
 import logging
 import random
+import re
 
 import discord
 
@@ -114,24 +115,48 @@ def get_commands(bot):
         """Compte le nombre d'emoji utilisé"""
         id_server = str(ctx.guild.id)
         emoji_utils.download_emoji_file(logger)
+        emoji_member_count = None
 
-        if ctx.message.mentions:
-            id_member = str(ctx.message.mentions[0].id)
-            emoji_count = emoji_utils.count_emoji_by_server_and_nick(id_server, id_member, logger)
+        for word in ctx.message.content.split(' '):
+            if re.match(const.EMOJI_PATTERN, word):
+                id_emoji = re.search(const.EMOJI_PATTERN, word).group(2)
+                emoji_member_count = emoji_utils.count_emoji_by_emoji_id(id_emoji, logger)
+                break
+
+        if emoji_member_count:
+            guild = ctx.message.guild
+            visible_members_score = []
+            for member in guild.members:
+                if str(member.id) in emoji_member_count:
+                    visible_members_score.append([member.nick if member.nick is not None else member.name, emoji_member_count[str(member.id)]])
+
+            emoji_member_count_sorted = sorted(visible_members_score, key=lambda v: v[1], reverse=True)
+
+            i = 0
+            while i < 10 and i < len(emoji_member_count_sorted):
+                await ctx.send(
+                    str(emoji_member_count_sorted[i][0]) + ' l\'a utilisé ' + str(emoji_member_count_sorted[i][1]) + ' fois', )
+                i += 1
         else:
-            emoji_count = emoji_utils.count_emoji_by_server(id_server, logger)
-        visible_emojis = bot.emojis
-        visible_emojis_count = []
-        for emoji in visible_emojis:
-            if str(emoji.id) in emoji_count:
-                visible_emojis_count.append([emoji, emoji_count[str(emoji.id)]])
+            if ctx.message.mentions:
+                id_member = str(ctx.message.mentions[0].id)
+                emoji_count = emoji_utils.count_emoji_by_server_and_nick(id_server, id_member, logger)
+            else:
+                emoji_count = emoji_utils.count_emoji_by_server(id_server, logger)
 
-        visible_emojis_count = sorted(visible_emojis_count, key=lambda v: v[1], reverse=True)
+            visible_emojis = bot.emojis
+            visible_emojis_count = []
 
-        i = 0
-        while i < 10 and i < len(visible_emojis_count):
-            await ctx.send(str(visible_emojis_count[i][0])+' a été utilisé '+str(visible_emojis_count[i][1])+' fois',)
-            i += 1
+            for emoji in visible_emojis:
+                if str(emoji.id) in emoji_count:
+                    visible_emojis_count.append([emoji, emoji_count[str(emoji.id)]])
+
+            visible_emojis_count = sorted(visible_emojis_count, key=lambda v: v[1], reverse=True)
+
+            i = 0
+            while i < 10 and i < len(visible_emojis_count):
+                await ctx.send(str(visible_emojis_count[i][0])+' a été utilisé '+str(visible_emojis_count[i][1])+' fois',)
+                i += 1
 
     # Quiz part here, don't touch if you don't know what you are doing
     @bot.command()
