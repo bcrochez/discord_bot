@@ -1,6 +1,7 @@
 import os
 import logging
 
+import discord
 from discord.ext import commands
 
 import utils.utils
@@ -14,7 +15,9 @@ DISCORD_BOT_TOKEN = os.environ.get('TOKEN')
 logger = utils.utils.get_logger('discord bot', logging.INFO)
 
 # creating bot
-bot = commands.Bot(command_prefix='!')
+intents = discord.Intents.default()
+intents.members = True
+bot = commands.Bot(command_prefix='!', intents=intents)
 cmd.get_commands(bot)
 events.get_events(bot, logger)
 
